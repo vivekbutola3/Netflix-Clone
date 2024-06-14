@@ -46,7 +46,7 @@ const Navbar = () => {
                 </div>
                 <div onClick={toggleMobileMenu} className="lg:hidden flex flex-row items-center gap-2 ml-8 cursor-pointer relative">
                     <p className="text-white text-sm">Browse</p>
-                    <FaChevronDown style={{ color: "white" }} ClassName="text-white transatio" />
+                    <FaChevronDown style={{ color: "white" }} className="text-white transatio" />
                     <MobileMenu visible={showMobileMenu} />
                 </div>
                 <div className="flex flex-row ml-auto gap-7 items-center">
@@ -62,7 +62,7 @@ const Navbar = () => {
                         </div>
                         <FaChevronDown style={{
                             color: "white",
-                            }} ClassName={`text-white transation ${showAccountMenu ? 'rotate-180' : 'rorate-0'}`} />
+                            }} className={`text-white transation ${showAccountMenu ? 'rotate-180' : 'rorate-0'}`} />
                         <AccountMenu visible={showAccountMenu} />
                     </div>
                 </div>
