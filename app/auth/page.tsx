@@ -1,5 +1,5 @@
 "use client";
-import Input from "@/Components/Input";
+import Input from "../../Components/Input";
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { signIn } from "next-auth/react";

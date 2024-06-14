@@ -1,64 +1,47 @@
 "use client";
-import { NextPageContext } from "next";
-import { getSession, useSession } from "next-auth/react";
+
+import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
-import { useEffect } from 'react';
-import {useCurrentUser} from "@/hooks/useCurrentUser";
+import { useCallback, useEffect } from "react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const images = [
   '/images/default-blue.png',
   '/images/default-red.png',
   '/images/default-slate.png',
   '/images/default-green.png'
-]
+];
 
 interface UserCardProps {
   name: string;
 }
 
+const UserCard: React.FC<UserCardProps> = ({ name }) => {
+  const imgSrc = images[Math.floor(Math.random() * images.length)];
 
-export function AuthCheck(){
+  return (
+    <div className="group flex-row w-44 mx-auto">
+      <div className="w-44 h-44 rounded-md flex items-center justify-center border-2 border-transparent group-hover:cursor-pointer group-hover:border-white overflow-hidden">
+        <img draggable={false} className="w-max h-max object-contain" src={imgSrc} alt="" />
+      </div>
+      <div className="mt-4 text-gray-400 text-2xl text-center group-hover:text-white">{name}</div>
+    </div>
+  );
+};
+
+const App = () => {
   const router = useRouter();
+  const { data: user } = useCurrentUser();
 
   useEffect(() => {
     const checkSession = async () => {
       const session = await getSession();
-      
       if (!session) {
         router.push('/auth');
       }
     };
-
     checkSession();
   }, [router]);
-  return {
-    props: {
-      
-    }
-  }
-}
-
-
-
-
-const UserCard: React.FC<UserCardProps> = ({ name }) => {
-  const imgSrc = images[Math.floor(Math.random() * 4)];
-
-  return (
-    <div className="group flex-row w-44 mx-auto">
-        <div className="w-44 h-44 rounded-md flex items-center justify-center border-2 border-transparent group-hover:cursor-pointer group-hover:border-white overflow-hidden">
-          <img draggable={false} className="w-max h-max object-contain" src={imgSrc} alt="" />
-        </div>
-      <div className="mt-4 text-gray-400 text-2xl text-center group-hover:text-white">{name}</div>
-   </div>
-  );
-}
-
-const App = () => {
-  AuthCheck();
-  const router = useRouter();
-  const { data: user } = useCurrentUser();
 
   const selectProfile = useCallback(() => {
     router.push('/');
@@ -69,15 +52,14 @@ const App = () => {
       <div className="flex flex-col">
         <h1 className="text-3xl md:text-6xl text-white text-center">Who&#39;s watching?</h1>
         <div className="flex items-center justify-center gap-8 mt-10">
-          <div onClick={() => selectProfile()}>
-            <UserCard name={user?.name} />
-      
+          <div onClick={selectProfile}>
+            <UserCard name={user?.name || 'User'} />
           </div>
           <h1>{user?.name} </h1>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default App;

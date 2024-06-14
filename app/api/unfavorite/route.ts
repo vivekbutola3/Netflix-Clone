@@ -1,58 +1,49 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from 'next/server';
 import prismadb from '@/lib/prismadb';
+import { getServerSession } from 'next-auth';
+import { without } from 'lodash';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-import { getSession } from "next-auth/react";
-import { without } from "lodash";
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: NextRequest) {
   try {
-    if (req.method !== 'POST') {
-      return res.status(405).end();
-    }
-
-    const session = await getSession({ req });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      throw new Error('Not signed in');
+      return NextResponse.json({ message: 'Not signed in' }, { status: 401 });
     }
 
-    const { movieId } = req.body;
+    const { movieId } = await req.json();
+
+    if (!movieId) {
+      return NextResponse.json({ message: 'Movie ID is required' }, { status: 400 });
+    }
 
     const existingMovie = await prismadb.movie.findUnique({
-      where: {
-        id: movieId,
-      }
+      where: { id: movieId },
     });
 
     if (!existingMovie) {
-      throw new Error('Invalid ID');
+      return NextResponse.json({ message: 'Invalid Movie ID' }, { status: 404 });
     }
 
     const user = await prismadb.user.findUnique({
-      where: {
-        email: session.user.email,
-      },
+      where: { email: session.user.email },
     });
 
     if (!user) {
-      throw new Error('Invalid email');
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
     const updatedFavoriteIds = without(user.favoriteIds, movieId);
 
     const updatedUser = await prismadb.user.update({
-      where: {
-        email: session.user.email,
-      },
-      data: {
-        favoriteIds: updatedFavoriteIds,
-      }
+      where: { email: session.user.email },
+      data: { favoriteIds: updatedFavoriteIds },
     });
 
-    return res.status(200).json(updatedUser);
+    return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).end();
+    console.error(error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
